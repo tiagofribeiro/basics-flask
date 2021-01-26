@@ -1,0 +1,5 @@
+>> Notes - Flask <<
+
+
+> Returning a string:   text/html
+> Returning a dict:     application/json
