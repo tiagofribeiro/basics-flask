@@ -1,5 +1,8 @@
->> Notes - Flask <<
+>> Notes - Python, Flask <<
+
+> __name__ indica o nome do módulo em execução. "__main__" quer dizer que o módulo em execução é o principal.
 
 
 > Returning a string:   text/html
 > Returning a dict:     application/json
+
