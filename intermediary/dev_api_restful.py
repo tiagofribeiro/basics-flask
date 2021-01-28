@@ -1,6 +1,6 @@
 from flask import Flask, json, request
 from flask_restful import Resource, Api
-from habilidades import Habilidades
+from intermediary.habilidades import Habilidades
 
 app = Flask(__name__)
 api = Api(app)

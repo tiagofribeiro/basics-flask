@@ -2,7 +2,8 @@
 
 > __name__ indica o nome do módulo em execução. "__main__" quer dizer que o módulo em execução é o principal.
 
+> REST é um estilo de arquitetura que define as restrições usadas em WebServices
+> RESTful é a aplicação dos princípios REST em um sistema ("um sistema é ou não RESTful"). 
 
 > Returning a string:   text/html
 > Returning a dict:     application/json
-
