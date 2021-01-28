@@ -1,7 +1,6 @@
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql.schema import Column, ForeignKey
 
 # Criação das propriedades do banco e da sessão
 engine = create_engine('sqlite:///atividades.db', convert_unicode=True)
@@ -39,6 +38,20 @@ class Atividades(Base):
     nome = Column(String(80))
     pessoa_id = Column(Integer, ForeignKey('pessoas.id'))
     pessoa = relationship("Pessoas")
+
+    # Retorna o resultado da consulta
+    def __repr__ (self):
+        return f'<Atividade {self.nome}>'
+    
+    # Realiza o commit de alguma operação
+    def save(self):
+        db_session.add(self)
+        db_session.commit()
+
+    # Deleta um registro e realiza o commit
+    def delete(self):
+        db_session.delete(self)
+        db_session.commit()
 
 # Cria o banco e a sessãos
 def init_db():
