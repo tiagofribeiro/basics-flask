@@ -2,28 +2,40 @@ from flask import Flask, request
 from flask.globals import request
 from flask.json import jsonify
 from flask_restful import Resource, Api
-from models import Atividades, Pessoas
+from models import Atividades, Pessoas, Usuarios
+from flask_httpauth import HTTPBasicAuth
 
+auth = HTTPBasicAuth()
 app = Flask(__name__)
 api = Api(app)
 
+
+@auth.verify_password
+def verificacao(login, senha):
+    print("Validando usuário")
+    if not (login, senha):
+        return False
+    return Usuarios.query.filter_by(login=login, senha=senha).first()
+
+
 class Pessoa(Resource):
-    # Busca os dados de uma pessoa a partir do nome
+    # Busca os dados de uma pessoa a partir do nome e verifica se o login foi realizado
+    @auth.login_required
     def get(self, nome):
         pessoa = Pessoas.query.filter_by(nome=nome).first()
         try:
             response = {
-                'id' : pessoa.id,
-                'nome' : pessoa.nome,
-                'idade' : pessoa.idade
+                'id': pessoa.id,
+                'nome': pessoa.nome,
+                'idade': pessoa.idade
             }
         except AttributeError:
             response = {
-                'success' : False,
-                'message' : 'Pessoa nao encontrada'
+                'success': False,
+                'message': 'Pessoa nao encontrada'
             }
         return response
-    
+
     # Altera um dado da pessoa pesquisada
     def put(self, nome):
         pessoa = Pessoas.query.filter_by(nome=nome).first()
@@ -35,37 +47,41 @@ class Pessoa(Resource):
         pessoa.save()
         try:
             response = {
-                'id' : pessoa.id,
-                'nome' : pessoa.nome,
-                'idade' : pessoa.idade
+                'id': pessoa.id,
+                'nome': pessoa.nome,
+                'idade': pessoa.idade
             }
         except AttributeError:
             response = {
-                'success' : False,
-                'message' : 'Não foi possível realizar a alteração'
+                'success': False,
+                'message': 'Não foi possível realizar a alteração'
             }
         return response
-    
+
     # Remove a pessoa pesquisada
     def delete(self, nome):
         pessoa = Pessoas.query.filter_by(nome=nome).first()
         try:
             pessoa.delete()
-            mensagem = { 'success' : True, 'message' : f"{pessoa.nome} deletado(a) com sucesso." }
+            mensagem = {'success': True,
+                        'message': f"{pessoa.nome} deletado(a) com sucesso."}
         except Exception:
-            mensagem = { 'success' : False, 'message' : "Não foi possível remover este registro."}
-        
+            mensagem = {'success': False,
+                        'message': "Não foi possível remover este registro."}
+
         return mensagem
 
+
 class ListaPessoas(Resource):
+    @auth.login_required
     def get(self):
         pessoas = Pessoas.query.all()
         response = [
             {
-                'id' : i.id, 
-                'nome' : i.nome, 
-                'idade' : i.idade
-            } 
+                'id': i.id,
+                'nome': i.nome,
+                'idade': i.idade
+            }
             for i in pessoas
         ]
         return response
@@ -75,20 +91,23 @@ class ListaPessoas(Resource):
             dados = request.json
             pessoa = Pessoas(nome=dados["nome"], idade=dados["idade"])
             pessoa.save()
-            response = { 'success' : True, 'message' : f"{pessoa.nome} adicionado(a) com sucesso." }
+            response = {'success': True,
+                        'message': f"{pessoa.nome} adicionado(a) com sucesso."}
         except Exception:
-            response = { 'success' : False, 'message' : "Não foi possível adicionar esta pessoa." }
+            response = {'success': False,
+                        'message': "Não foi possível adicionar esta pessoa."}
         return response
+
 
 class ListaAtividades(Resource):
     def get(self):
         atividades = Atividades.query.all()
         response = [
             {
-                'id' : i.id, 
-                'nome' : i.nome, 
-                'pessoa' : i.pessoa.idade
-            } 
+                'id': i.id,
+                'nome': i.nome,
+                'pessoa': i.pessoa.idade
+            }
             for i in atividades
         ]
         return response
@@ -99,11 +118,12 @@ class ListaAtividades(Resource):
         atividade = Atividades(nome=dados["nome"], pessoa=pessoa)
         atividade.save()
         response = {
-            'pessoa' : atividade.pessoa.nome,
-            'nome' : atividade.nome,
-            'id' : atividade.id
+            'pessoa': atividade.pessoa.nome,
+            'nome': atividade.nome,
+            'id': atividade.id
         }
         return response
+
 
 api.add_resource(Pessoa, '/pessoa/<string:nome>')
 api.add_resource(ListaPessoas, '/pessoas')
